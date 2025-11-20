@@ -1,0 +1,1190 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 家庭財務健檢</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #fff7ed; /* bg-orange-50 */
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 0.75rem; /* 12px */
+            padding: 1.5rem; /* 24px */
+            margin-bottom: 1.5rem; /* 24px */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .question-item {
+            border-bottom: 1px solid #fed7aa; /* orange-200 */
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .question-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem; /* 12px */
+            flex-wrap: wrap;
+        }
+        .options label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.875rem; /* 14px */
+            color: #4b5563; /* gray-600 */
+            min-width: 40px;
+            text-align: center;
+        }
+        .options input[type="radio"] {
+            accent-color: #f88137; /* 指定橘色 */
+            width: 1.25rem; /* 20px */
+            height: 1.25rem; /* 20px */
+            margin-bottom: 0.25rem; /* 4px */
+        }
+        
+        /* 結果區塊樣式 */
+        .result-box {
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: white;
+            border-width: 2px; 
+        }
+        
+        /* 狀態顏色定義 */
+        .result-box-green { border-color: #22c55e; border-top-width: 6px; }
+        .result-box-yellow { border-color: #eab308; border-top-width: 6px; }
+        .result-box-orange { border-color: #f97316; border-top-width: 6px; }
+        .result-box-red { border-color: #ef4444; border-top-width: 6px; }
+
+        /* 詳細建議區塊樣式 */
+        .advice-card {
+            background-color: white;
+            border-left: 6px solid #f88137; /* 橘色左邊框 */
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-plan-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .action-plan-list li {
+            position: relative;
+            padding-left: 2rem; /* 32px */
+            margin-bottom: 0.5rem; /* 8px */
+        }
+        .action-plan-list li::before {
+            content: '□';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.5rem; /* 24px */
+            line-height: 1.25;
+            color: #9ca3af; /* gray-400 */
+        }
+        
+        /* 動態顯示的個別結果卡片樣式 */
+        .section-result {
+            background-color: #fff7ed; /* orange-50 */
+            border: 1px solid #fed7aa; /* orange-200 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            animation: fadeIn 0.5s ease-in-out;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #431407; /* orange-950 */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 彈出視窗樣式 (預設隱藏) */
+        #validationModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        #validationContent {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f88137;
+            text-align: center;
+            min-width: 300px;
+            max-width: 90%;
+        }
+
+        /* 列印時的樣式設定 - 強制背景色列印 */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white;
+                font-size: 12pt;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .question-card, .result-box, .advice-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                break-inside: avoid; /* 避免被切斷 */
+                page-break-inside: avoid;
+            }
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+            /* 確保顏色被列印 */
+            .bg-orange-50 { background-color: #fff7ed !important; }
+            .bg-green-50 { background-color: #f0fdf4 !important; }
+            .bg-yellow-50 { background-color: #fefce8 !important; }
+            .bg-red-50 { background-color: #fef2f2 !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- ===== Logo 頂部置中區域 ===== -->
+    <header class="bg-white shadow-sm w-full py-6 mb-6 border-b-4 border-[#f88137]">
+        <div class="max-w-3xl mx-auto px-4 flex flex-col items-center justify-center">
+            <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-md mb-2">
+                <img src="logo.png" 
+                     alt="MomPower Logo" 
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://placehold.co/128x128/f88137/ffffff?text=Logo';">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-orange-800 mb-2">🏠 家庭財務健檢</h1>
+        </header>
+
+        <!-- 介紹 -->
+        <section class="question-card border-t-4 border-[#f88137]">
+            <h2 class="text-2xl font-bold text-orange-700 mb-4">你家的安全度有幾分？</h2>
+            <div class="text-gray-700 leading-relaxed space-y-4">
+                <p>
+                    一個人時可以瀟灑自由，但在有了家庭和孩子後，新手媽媽經常需要面對每個月的收支壓力。總覺得是不是自己賺得不夠多？錢都不知道花到哪裡去了？
+                </p>
+                <p class="font-bold text-orange-800 text-lg">
+                    你的擔憂我們懂。
+                </p>
+                <p>
+                    MomPower 媽媽商學院希望透過這一份<span class="font-bold text-orange-600">「家庭財務健檢」</span>，幫助你：
+                </p>
+                <ul class="list-disc list-inside pl-2 md:pl-4 space-y-2 bg-orange-50 p-4 rounded-lg border border-orange-100">
+                    <li><strong>快速檢視</strong> 財務現況</li>
+                    <li><strong>找到合適</strong> 的媽媽社群與學習資源</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 使用說明 -->
+        <section class="question-card bg-orange-50">
+            <h2 class="text-2xl font-bold text-orange-800 mb-4">📋 使用說明</h2>
+            <p class="text-gray-700 mb-4">
+                這份量表幫助你了解目前家庭財務的安全程度，並找出可以加強的方向。請根據家庭目前的真實狀況作答，誠實評估現況。
+            </p>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
+                <h3 class="font-semibold text-orange-700 mb-2">評分方式：</h3>
+                <ul class="list-none space-y-1 text-gray-600">
+                    <li><strong>1分：</strong>完全沒有</li>
+                    <li><strong>2分：</strong>稍微具備</li>
+                    <li><strong>3分：</strong>部分具備</li>
+                    <li><strong>4分：</strong>大致具備</li>
+                    <li><strong>5分：</strong>完全具備</li>
+                </ul>
+            </div>
+        </section>
+
+        <form id="quizForm">
+            <!-- 第一部分 -->
+            <h2 class="text-3xl font-bold text-gray-700 mt-10 mb-6 border-l-8 border-[#f88137] pl-4">第一部分：財務基礎與應變能力</h2>
+
+            <!-- A. 收支掌控力 -->
+            <div class="question-card" id="sectionA">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">A. 收支掌控力</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">清楚知道每月的總收入</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qA1" value="1"></label>
+                            <label>2<input type="radio" name="qA1" value="2"></label>
+                            <label>3<input type="radio" name="qA1" value="3"></label>
+                            <label>4<input type="radio" name="qA1" value="4"></label>
+                            <label>5<input type="radio" name="qA1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">了解每月主要支出項目和金額</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qA2" value="1"></label>
+                            <label>2<input type="radio" name="qA2" value="2"></label>
+                            <label>3<input type="radio" name="qA2" value="3"></label>
+                            <label>4<input type="radio" name="qA2" value="4"></label>
+                            <label>5<input type="radio" name="qA2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">有記帳習慣，知道錢花到哪裡去</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qA3" value="1"></label>
+                            <label>2<input type="radio" name="qA3" value="2"></label>
+                            <label>3<input type="radio" name="qA3" value="3"></label>
+                            <label>4<input type="radio" name="qA3" value="4"></label>
+                            <label>5<input type="radio" name="qA3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">每月支出控制在收入範圍內</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qA4" value="1"></label>
+                            <label>2<input type="radio" name="qA4" value="2"></label>
+                            <label>3<input type="radio" name="qA4" value="3"></label>
+                            <label>4<input type="radio" name="qA4" value="4"></label>
+                            <label>5<input type="radio" name="qA4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">有固定的儲蓄習慣</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qA5" value="1"></label>
+                            <label>2<input type="radio" name="qA5" value="2"></label>
+                            <label>3<input type="radio" name="qA5" value="3"></label>
+                            <label>4<input type="radio" name="qA5" value="4"></label>
+                            <label>5<input type="radio" name="qA5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計A：<span id="subtotalA">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultA" class="hidden"></div>
+            </div>
+
+            <!-- B. 緊急應變能力 -->
+            <div class="question-card" id="sectionB">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">B. 緊急應變能力</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">有預備好緊急預備金（至少3個月生活費）</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qB1" value="1"></label>
+                            <label>2<input type="radio" name="qB1" value="2"></label>
+                            <label>3<input type="radio" name="qB1" value="3"></label>
+                            <label>4<input type="radio" name="qB1" value="4"></label>
+                            <label>5<input type="radio" name="qB1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">如果遇到突發狀況，財務面不會手忙腳亂</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qB2" value="1"></label>
+                            <label>2<input type="radio" name="qB2" value="2"></label>
+                            <label>3<input type="radio" name="qB2" value="3"></label>
+                            <label>4<input type="radio" name="qB2" value="4"></label>
+                            <label>5<input type="radio" name="qB2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">財務遇到緊急狀況時，知道可以向誰求助</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qB3" value="1"></label>
+                            <label>2<input type="radio" name="qB3" value="2"></label>
+                            <label>3<input type="radio" name="qB3" value="3"></label>
+                            <label>4<input type="radio" name="qB3" value="4"></label>
+                            <label>5<input type="radio" name="qB3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">有多元化的收入來源規劃</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qB4" value="1"></label>
+                            <label>2<input type="radio" name="qB4" value="2"></label>
+                            <label>3<input type="radio" name="qB4" value="3"></label>
+                            <label>4<input type="radio" name="qB4" value="4"></label>
+                            <label>5<input type="radio" name="qB4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">家庭主要收入者有基本保險保障</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qB5" value="1"></label>
+                            <label>2<input type="radio" name="qB5" value="2"></label>
+                            <label>3<input type="radio" name="qB5" value="3"></label>
+                            <label>4<input type="radio" name="qB5" value="4"></label>
+                            <label>5<input type="radio" name="qB5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計B：<span id="subtotalB">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultB" class="hidden"></div>
+            </div>
+
+            <!-- C. 未來規劃準備度 -->
+            <div class="question-card" id="sectionC">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">C. 未來規劃準備度</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">有為孩子準備教育基金</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qC1" value="1"></label>
+                            <label>2<input type="radio" name="qC1" value="2"></label>
+                            <label>3<input type="radio" name="qC1" value="3"></label>
+                            <label>4<input type="radio" name="qC1" value="4"></label>
+                            <label>5<input type="radio" name="qC1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">開始為退休做財務準備</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qC2" value="1"></label>
+                            <label>2<input type="radio" name="qC2" value="2"></label>
+                            <label>3<input type="radio" name="qC2" value="3"></label>
+                            <label>4<input type="radio" name="qC2" value="4"></label>
+                            <label>5<input type="radio" name="qC2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">了解基本的投資理財概念</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qC3" value="1"></label>
+                            <label>2<input type="radio" name="qC3" value="2"></label>
+                            <label>3<input type="radio" name="qC3" value="3"></label>
+                            <label>4<input type="radio" name="qC3" value="4"></label>
+                            <label>5<input type="radio" name="qC3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">有長期的財務目標設定</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qC4" value="1"></label>
+                            <label>2<input type="radio" name="qC4" value="2"></label>
+                            <label>3<input type="radio" name="qC4" value="3"></label>
+                            <label>4<input type="radio" name="qC4" value="4"></label>
+                            <label>5<input type="radio" name="qC4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">定期檢視和調整理財計畫</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qC5" value="1"></label>
+                            <label>2<input type="radio" name="qC5" value="2"></label>
+                            <label>3<input type="radio" name="qC5" value="3"></label>
+                            <label>4<input type="radio" name="qC5" value="4"></label>
+                            <label>5<input type="radio" name="qC5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計C：<span id="subtotalC">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultC" class="hidden"></div>
+            </div>
+
+            <!-- 第二部分 -->
+            <h2 class="text-3xl font-bold text-gray-700 mt-10 mb-6 border-l-8 border-[#f88137] pl-4">第二部分：財務安全感與外部資源</h2>
+
+            <!-- D. 金錢安心感 -->
+            <div class="question-card" id="sectionD">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">D. 金錢安心感</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">對目前的財務狀況感到踏實</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qD1" value="1"></label>
+                            <label>2<input type="radio" name="qD1" value="2"></label>
+                            <label>3<input type="radio" name="qD1" value="3"></label>
+                            <label>4<input type="radio" name="qD1" value="4"></label>
+                            <label>5<input type="radio" name="qD1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">不會因為金錢問題而經常失眠</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qD2" value="1"></label>
+                            <label>2<input type="radio" name="qD2" value="2"></label>
+                            <label>3<input type="radio" name="qD2" value="3"></label>
+                            <label>4<input type="radio" name="qD2" value="4"></label>
+                            <label>5<input type="radio" name="qD2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">面對意外支出不會影響心情</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qD3" value="1"></label>
+                            <label>2<input type="radio" name="qD3" value="2"></label>
+                            <label>3<input type="radio" name="qD3" value="3"></label>
+                            <label>4<input type="radio" name="qD3" value="4"></label>
+                            <label>5<input type="radio" name="qD3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">相信自己有能力管理家庭財務</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qD4" value="1"></label>
+                            <label>2<input type="radio" name="qD4" value="2"></label>
+                            <label>3<input type="radio" name="qD4" value="3"></label>
+                            <label>4<input type="radio" name="qD4" value="4"></label>
+                            <label>5<input type="radio" name="qD4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">對未來的經濟生活有信心</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qD5" value="1"></label>
+                            <label>2<input type="radio" name="qD5" value="2"></label>
+                            <label>3<input type="radio" name="qD5" value="3"></label>
+                            <label>4<input type="radio" name="qD5" value="4"></label>
+                            <label>5<input type="radio" name="qD5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計D：<span id="subtotalD">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultD" class="hidden"></div>
+            </div>
+
+            <!-- E. 理財知識開放度 -->
+            <div class="question-card" id="sectionE">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">E. 理財知識開放度</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">基本理解常見的理財工具</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qE1" value="1"></label>
+                            <label>2<input type="radio" name="qE1" value="2"></label>
+                            <label>3<input type="radio" name="qE1" value="3"></label>
+                            <label>4<input type="radio" name="qE1" value="4"></label>
+                            <label>5<input type="radio" name="qE1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">對於投資配置方式，自己有一套邏輯</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qE2" value="1"></label>
+                            <label>2<input type="radio" name="qE2" value="2"></label>
+                            <label>3<input type="radio" name="qE2" value="3"></label>
+                            <label>4<input type="radio" name="qE2" value="4"></label>
+                            <label>5<input type="radio" name="qE2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">對於新的投資資訊，有自己的辨識方式</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qE3" value="1"></label>
+                            <label>2<input type="radio" name="qE3" value="2"></label>
+                            <label>3<input type="radio" name="qE3" value="3"></label>
+                            <label>4<input type="radio" name="qE3" value="4"></label>
+                            <label>5<input type="radio" name="qE3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">身邊有朋友圈或學習圈可以共同討論理財投資問題</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qE4" value="1"></label>
+                            <label>2<input type="radio" name="qE4" value="2"></label>
+                            <label>3<input type="radio" name="qE4" value="3"></label>
+                            <label>4<input type="radio" name="qE4" value="4"></label>
+                            <label>5<input type="radio" name="qE4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">對於理財投資新的資訊抱持的開放態度了解</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qE5" value="1"></label>
+                            <label>2<input type="radio" name="qE5" value="2"></label>
+                            <label>3<input type="radio" name="qE5" value="3"></label>
+                            <label>4<input type="radio" name="qE5" value="4"></label>
+                            <label>5<input type="radio" name="qE5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計E：<span id="subtotalE">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultE" class="hidden"></div>
+            </div>
+
+            <!-- F. 家庭財務溝通 -->
+            <div class="question-card" id="sectionF">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">F. 家庭財務溝通</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">和伴侶能夠開誠布公討論金錢</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qF1" value="1"></label>
+                            <label>2<input type="radio" name="qF1" value="2"></label>
+                            <label>3<input type="radio" name="qF1" value="3"></label>
+                            <label>4<input type="radio" name="qF1" value="4"></label>
+                            <label>5<input type="radio" name="qF1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">家庭重大支出會一起商量決定</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qF2" value="1"></label>
+                            <label>2<input type="radio" name="qF2" value="2"></label>
+                            <label>3<input type="radio" name="qF2" value="3"></label>
+                            <label>4<input type="radio" name="qF2" value="4"></label>
+                            <label>5<input type="radio" name="qF2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">對家庭財務分工有清楚共識</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qF3" value="1"></label>
+                            <label>2<input type="radio" name="qF3" value="2"></label>
+                            <label>3<input type="radio" name="qF3" value="3"></label>
+                            <label>4<input type="radio" name="qF3" value="4"></label>
+                            <label>5<input type="radio" name="qF3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">能夠理性處理金錢相關的分歧</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qF4" value="1"></label>
+                            <label>2<input type="radio" name="qF4" value="2"></label>
+                            <label>3<input type="radio" name="qF4" value="3"></label>
+                            <label>4<input type="radio" name="qF4" value="4"></label>
+                            <label>5<input type="radio" name="qF4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">對孩子教育使用金錢方式有共同理念</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qF5" value="1"></label>
+                            <label>2<input type="radio" name="qF5" value="2"></label>
+                            <label>3<input type="radio" name="qF5" value="3"></label>
+                            <label>4<input type="radio" name="qF5" value="4"></label>
+                            <label>5<input type="radio" name="qF5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計F：<span id="subtotalF">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultF" class="hidden"></div>
+            </div>
+
+            <!-- G. 外部支持系統 -->
+            <div class="question-card" id="sectionG">
+                <h3 class="text-xl font-bold text-orange-700 mb-4">G. 外部支持系統</h3>
+                <div class="space-y-4">
+                    <div class="question-item">
+                        <p class="font-semibold">對意外狀況，家人可以互相討論或支援</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qG1" value="1"></label>
+                            <label>2<input type="radio" name="qG1" value="2"></label>
+                            <label>3<input type="radio" name="qG1" value="3"></label>
+                            <label>4<input type="radio" name="qG1" value="4"></label>
+                            <label>5<input type="radio" name="qG1" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">有長期往來互動良好的銀行資源</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qG2" value="1"></label>
+                            <label>2<input type="radio" name="qG2" value="2"></label>
+                            <label>3<input type="radio" name="qG2" value="3"></label>
+                            <label>4<input type="radio" name="qG2" value="4"></label>
+                            <label>5<input type="radio" name="qG2" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">身邊有好的學習社群和專業顧問</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qG3" value="1"></label>
+                            <label>2<input type="radio" name="qG3" value="2"></label>
+                            <label>3<input type="radio" name="qG3" value="3"></label>
+                            <label>4<input type="radio" name="qG3" value="4"></label>
+                            <label>5<input type="radio" name="qG3" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">有了解並善用政策提供的資源</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qG4" value="1"></label>
+                            <label>2<input type="radio" name="qG4" value="2"></label>
+                            <label>3<input type="radio" name="qG4" value="3"></label>
+                            <label>4<input type="radio" name="qG4" value="4"></label>
+                            <label>5<input type="radio" name="qG4" value="5"></label>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <p class="font-semibold">常常有在觀看留意新的財經資訊</p>
+                        <div class="options">
+                            <label>1<input type="radio" name="qG5" value="1"></label>
+                            <label>2<input type="radio" name="qG5" value="2"></label>
+                            <label>3<input type="radio" name="qG5" value="3"></label>
+                            <label>4<input type="radio" name="qG5" value="4"></label>
+                            <label>5<input type="radio" name="qG5" value="5"></label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 小計欄位 -->
+                <div class="text-right text-lg font-bold text-orange-800 mt-6">
+                    小計G：<span id="subtotalG">0</span> 分
+                </div>
+                <!-- 結果顯示區塊 (預設隱藏) -->
+                <div id="resultG" class="hidden"></div>
+            </div>
+        </form>
+
+        <!-- 按鈕 -->
+        <div class="text-center my-10 flex flex-wrap gap-4 justify-center no-print">
+            <button id="calculateButton" class="bg-[#f88137] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-orange-600 transition duration-300 transform hover:scale-105">
+                📊 查看我的財務健檢分析
+            </button>
+            <!-- 下載按鈕 (預設隱藏) - 使用 onclick 直接觸發以確保相容性 -->
+            <button id="downloadButton" onclick="window.print()" class="hidden bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                下載/列印分析報告
+            </button>
+            <button id="resetButton" class="bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-400 transition duration-300">
+                ↻ 重新填寫
+            </button>
+        </div>
+
+        <!-- 總分析結果 (預設隱藏) -->
+        <div id="results" class="hidden">
+            <!-- JS 會在這裡插入結果 -->
+        </div>
+
+        <!-- 提升財務安全度的行動計畫 -->
+        <section id="actionPlanSection" class="question-card mt-10 border-t-4 border-green-500 hidden">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">💪 提升財務安全度的行動計畫</h2>
+            <h3 class="font-semibold text-lg text-gray-800 mb-3">立即可做的事：</h3>
+            <ul class="action-plan-list text-gray-700 mb-6">
+                <li>開始記錄一週的支出</li>
+                <li>設定第一個小額儲蓄目標</li>
+                <li>加入<a href="https://lihi.cc/QRKPx" target="_blank" class="text-orange-600 hover:underline">8週存款成長營</a>LINE社群</li>
+                <li>和家人分享這份檢測結果</li>
+            </ul>
+
+            <h3 class="font-semibold text-lg text-gray-800 mb-3">一個月內可做的事：</h3>
+            <ul class="action-plan-list text-gray-700 mb-6">
+                <li>建立基本的記帳習慣</li>
+                <li>存下第一筆緊急預備金</li>
+                <li>了解家庭基本保險狀況</li>
+                <li>設定一個明確的理財目標</li>
+                <li>參考<a href="https://mompower.kaik.to/savemoney/test" target="_blank" class="text-orange-600 hover:underline">家庭理財必修課</a>建立正確且完整的財商知識</li>
+                <li>參考<a href="https://mompower.kaik.to/track-plan/test" target="_blank" class="text-orange-600 hover:underline">60天存款成長計畫</a>讓教練陪伴你建立習慣並檢視預算和資產</li>
+            </ul>
+
+            <h3 class="font-semibold text-lg text-gray-800 mb-3">三個月內可做的事：</h3>
+            <ul class="action-plan-list text-gray-700">
+                <li>建立穩定的儲蓄習慣</li>
+                <li>學習基本投資理財概念</li>
+                <li>改善家庭財務溝通模式</li>
+                <li>考慮專業理財服務或課程</li>
+                <li>參考<a href="https://mompower.kaik.to/momfinance/test" target="_blank" class="text-orange-600 hover:underline">幸福家庭財務長</a>認識更多理財工具</li>
+                <li>參考<a href="https://mompower.kaik.to/60days-coaching/test" target="_blank" class="text-orange-600 hover:underline">陪跑教練培訓營</a>考慮將家庭理財成為一門創收專業</li>
+            </ul>
+        </section>
+
+        <!-- 鼓勵話語 -->
+        <section id="encouragementSection" class="question-card bg-orange-50 text-center border border-orange-100 hidden">
+            <h2 class="text-2xl font-bold text-orange-700 mb-4">🌟 給你的鼓勵話語</h2>
+            <p class="text-orange-800 leading-relaxed mb-4">
+                親愛的媽媽，<br>
+                財務安全不是一天就能建立的，但每一個小行動都在讓你的家庭更安全。
+                無論你現在的分數是多少，都請記住：
+            </p>
+            <ul class="list-none text-orange-700 space-y-2 mb-4">
+                <li>你願意檢視財務狀況，就已經踏出重要的第一步</li>
+                <li>每個家庭的起點不同，專注於自己的進步就好</li>
+                <li>財務安全是一個過程，不是終點</li>
+                <li>你已經是個很棒的媽媽了</li>
+            </ul>
+            <p class="text-orange-800 leading-relaxed">
+                如果需要更多支持和陪伴，MomPower團隊隨時在這裡。讓我們一起為家庭建立更穩固的財務安全網！💪
+            </p>
+        </section>
+
+        <!-- 頁尾版權聲明 -->
+        <footer class="text-center mt-8 text-gray-500 text-sm pb-8 border-t border-orange-200 pt-6">
+            <p class="mb-2">這份家庭財務健檢量表是一個自我了解的工具，幫助你找到改善方向。如果面臨嚴重的財務困難，建議尋求專業的財務規劃協助。</p>
+            <p>&copy; 2025 MomPower 媽媽商學院. All Rights Reserved.</p>
+        </footer>
+
+        <!-- 錯誤提示視窗結構 -->
+        <div id="validationModal">
+            <div id="validationContent">
+                <p class="text-lg font-bold text-red-700 mb-3 text-center">請回答所有的問題，才能產生準確的分析報告喔！</p>
+                <div class="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-4">
+                    <p class="font-bold text-gray-700 mb-2">👇 以下部分尚未完成：</p>
+                    <div id="validationList" class="text-left pl-2"></div>
+                </div>
+                <button id="closeValidationModal" class="bg-[#f88137] text-white py-2 px-8 rounded-full font-bold hover:bg-orange-600 transition shadow-md">
+                    了解，繼續填寫
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- JS 腳本 -->
+    <script>
+        // 詳細的分析建議資料 (保留完整內容)
+        const adviceData = {
+            A: [
+                { min: 5, max: 12, desc: "目前對家庭收支不夠清楚，容易出現「錢不知花到哪裡」的狀況。", action: "從記帳開始，先掌握每月現金流。" },
+                { min: 13, max: 16, desc: "已開始留意收支，但發現不知為何常常超出預算。", action: "嘗試設定每月「可支出上限」，建立花費預算表。" },
+                { min: 16, max: 20, desc: "已有基礎的收支紀錄與儲蓄習慣。", action: "可開始進一步做「收支比例分析」（例如固定支出40%、儲蓄20%）。" },
+                { min: 21, max: 25, desc: "收支明確、儲蓄穩定，財務流向清楚。", action: "可嘗試規劃家庭年度預算或財務目標表，強化策略性管理。" }
+            ],
+            B: [
+                { min: 5, max: 9, desc: "無任何財務安全網，一但發生意外支出就會衝擊到生活。", action: "優先存下第一筆 1～3 個月生活費，並檢視保險配置。" },
+                { min: 10, max: 15, desc: "有基本儲蓄可做緊急預備金，但仍不夠應付收入中斷問題。", action: "建立「緊急資金帳戶」，並針對主要收入者做基礎保險規劃。" },
+                { min: 16, max: 18, desc: "已有預備金與保險概念，但收入偏單一需要創造更多收入。", action: "可強化收入多元化，如副業或被動收入。" },
+                { min: 21, max: 25, desc: "財務安全網完善，風險應變力強。", action: "可進一步學習「保障與投資平衡策略」，讓風險更有彈性。" }
+            ],
+            C: [
+                { min: 5, max: 9, desc: "尚未開始退休或教育基金規劃。", action: "從設定「未來三年目標」開始，例如為孩子開教育帳戶。" },
+                { min: 10, max: 15, desc: "有模糊的長期想法，但尚未行動。", action: "寫下具體的金額與時間目標，並嘗試每月小額投資。" },
+                { min: 16, max: 18, desc: "已開始規劃退休或子女教育基金。", action: "可增加投資多樣化，學習資產配置概念。" },
+                { min: 21, max: 25, desc: "長期財務規劃明確且穩定執行。", action: "定期檢視投資報酬與風險，進一步學習傳承與稅務策略。" }
+            ],
+            D: [
+                { min: 5, max: 9, desc: "陷入過度焦慮金錢與擔心未來，覺得自己都做不好。", action: "練習「感恩日記」減緩焦慮，才有力氣逐步調整財務狀況。" },
+                { min: 10, max: 15, desc: "不知道自己預備的夠不夠，所以對財務仍有極大的不安全感。", action: "針對自己沒有安全感的地方去量化數字，並制定適合自己的計畫。" },
+                { min: 16, max: 19, desc: "對財務大致安心，但不在計畫內的變化還是會影響心情。", action: "檢視突發事件，只要拉長時間不會影響大方向，就不要太過焦慮。" },
+                { min: 20, max: 25, desc: "有充分的思考預備，並且金錢觀健康、內心強大穩定。", action: "可分享經驗，幫助其他媽媽學習面對不同的財務狀況，都要健康面對。" }
+            ],
+            E: [
+                { min: 5, max: 8, desc: "對於「投資」抱有負面想法，因此抗拒去了解。", action: "先了解自己抗拒投資的原因是什麼，以及思考投資對自己為何重要。" },
+                { min: 9, max: 11, desc: "投資配置方式偏保守為主，以大盤走勢為主要投資標的。", action: "針對自己的家庭財務現在及未來需要做好整體規劃，針對不足的部分需要加強規劃。" },
+                { min: 12, max: 16, desc: "對於新的投資模式相對開放，有在嘗試一些不同的投資工具。", action: "家庭財務需要，建議仍以大盤走勢偏保守方式作為主要配置方式達成，在不影響家庭安全為前提，去嘗試不同投資工具。" },
+                { min: 17, max: 25, desc: "樂於嘗試新的工具，有很有自己的投資想法。", action: "有意識的冒險可以為你帶來更多收入，但追求高報酬的同時，對於家庭的財務需要，建議還是要以安全穩健的配置為主。" }
+            ],
+            F: [
+                { min: 5, max: 11, desc: "家裡很少討論金錢話題，每次討論就容易引發爭執或回避。", action: "先不改變他人，先建立自己正確的金錢使用觀念為主。" },
+                { min: 12, max: 16, desc: "遇到問題才溝通，但知道有很多區塊暫時沒共識，所以支出有分工但沒有長期財務規劃。", action: "建立安全的金錢對話空間，從「問題溝通」轉為「計畫溝通」。" },
+                { min: 17, max: 21, desc: "可以與另外一伴和孩子健康的談論錢的議題，並且都能建立共識。", action: "可邀伴侶一起設定共同討論長期的財務目標規劃，並討論該如何共同完成。" },
+                { min: 22, max: 25, desc: "與另外一伴和孩子都有良好的金錢習慣與規劃。", action: "可以更有意識的建立家庭理財文化，並引導孩子的財商教育。" }
+            ],
+            G: [
+                { min: 5, max: 9, desc: "幾乎沒有外部支援，面對財務問題常感到孤單、無從求助。", action: "針對自己的財務弱項，先了解是否有立即可以使用的外部資源。" },
+                { min: 10, max: 15, desc: "有一些外部管道，但沒有實際的去深入了解或使用。", action: "針對自己目前的財務階段，找到適合自己的學習團體。" },
+                { min: 16, max: 20, desc: "有相關的學習管道或專業顧問可詢問，也有善用銀行或政府資源。", action: "做好家庭財務藍圖規劃，針對自己的需要階段性主動對接資源。" },
+                { min: 21, max: 25, desc: "擁有完整的外部支援網絡，能針對不同情況去運用各方資源。", action: "主動幫助他人連結資源，成為社群中的分享者，擴大影響力，成為資源節點。" }
+            ]
+        };
+
+        // 產品連結
+        const productLinks = {
+            "8週存款成長營": "https://lihi.cc/QRKPx",
+            "家計力聊書會": "https://mompower.kaik.to/fqbook/test",
+            "家庭財富8金鑰": "https://mompower.kaik.to/8basic-finance/test",
+            "家庭理財必修課": "https://mompower.kaik.to/savemoney/test",
+            "幸福家庭財務長": "https://mompower.kaik.to/momfinance/test",
+            "60天存款成長計畫": "https://mompower.kaik.to/track-plan/test",
+            "陪跑教練培訓營": "https://mompower.kaik.to/60days-coaching/test",
+            "精算媽咪的家計簿 Podcast": "https://sandytwo.com/podcast/"
+        };
+
+        function createLink(text, key) {
+            const url = productLinks[key];
+            if (url) {
+                const baseUrl = url.replace(/\/test\/?$/, '');
+                return `<a href="${baseUrl}" target="_blank" class="text-orange-600 hover:underline font-semibold">${text}</a>`;
+            }
+            return text;
+        }
+
+        // 根據分數獲取建議
+        function getAdvice(section, score) {
+            const sectionAdvice = adviceData[section];
+            if (!sectionAdvice) return null;
+            return sectionAdvice.find(a => score >= a.min && score <= a.max);
+        }
+
+        // 監聽所有 radio 變動
+        document.querySelectorAll('#quizForm input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', updateSubtotals);
+        });
+
+        function updateSubtotals() {
+            ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(section => {
+                const result = calculateSection(section, 5);
+                document.getElementById(`subtotal${section}`).textContent = result.total;
+            });
+        }
+
+        function calculateSection(sectionId, numQuestions) {
+            let total = 0;
+            const sectionElement = document.getElementById(`section${sectionId}`);
+            const checkedRadios = sectionElement.querySelectorAll('input[type="radio"]:checked');
+            
+            checkedRadios.forEach(radio => {
+                total += parseInt(radio.value, 10);
+            });
+            
+            return { total: total, answered: checkedRadios.length === numQuestions };
+        }
+
+        // 計算按鈕
+        document.getElementById('calculateButton').addEventListener('click', showResults);
+        
+        // 重設按鈕
+        document.getElementById('resetButton').addEventListener('click', () => {
+            document.getElementById('quizForm').reset();
+            updateSubtotals();
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('results').classList.add('hidden');
+            
+            // 隱藏所有個別分析區塊
+            ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(section => {
+                const container = document.getElementById(`result${section}`);
+                container.innerHTML = '';
+                container.classList.add('hidden');
+            });
+
+            // 隱藏額外建議區塊
+            document.getElementById('actionPlanSection').classList.add('hidden');
+            document.getElementById('encouragementSection').classList.add('hidden');
+
+            // 隱藏下載按鈕
+            document.getElementById('downloadButton').classList.add('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 關閉驗證視窗
+        document.getElementById('closeValidationModal').addEventListener('click', () => {
+            document.getElementById('validationModal').style.display = 'none';
+        });
+
+        function showResults() {
+            const sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+            const sectionTitles = {
+                'A': 'A. 收支掌控力',
+                'B': 'B. 緊急應變能力',
+                'C': 'C. 未來規劃準備度',
+                'D': 'D. 金錢安心感',
+                'E': 'E. 理財知識開放度',
+                'F': 'F. 家庭財務溝通',
+                'G': 'G. 外部支持系統'
+            };
+            const scores = {};
+            let missingDetails = [];
+
+            // 驗證每個區塊是否有缺漏
+            sections.forEach(section => {
+                const sectionEl = document.getElementById(`section${section}`);
+                const items = sectionEl.querySelectorAll('.question-item');
+                let missingCount = 0;
+                
+                items.forEach(item => {
+                    if (!item.querySelector('input:checked')) {
+                        missingCount++;
+                    }
+                });
+
+                if (missingCount > 0) {
+                    missingDetails.push(`${sectionTitles[section]} <span class="text-red-500 font-bold ml-1">(${missingCount} 題未填)</span>`);
+                }
+
+                scores[section] = calculateSection(section, 5);
+            });
+
+            // 如果有缺漏，顯示詳細錯誤訊息
+            if (missingDetails.length > 0) {
+                const listContainer = document.getElementById('validationList');
+                listContainer.innerHTML = `
+                    <ul class='list-disc list-inside text-gray-700 space-y-1 ml-1'>
+                        ${missingDetails.map(detail => `<li class='border-b border-orange-100 pb-1 last:border-0'>${detail}</li>`).join('')}
+                    </ul>
+                `;
+                document.getElementById('validationModal').style.display = 'flex';
+                return;
+            }
+
+            // 1. 顯示個別區塊的分析建議
+            sections.forEach(section => {
+                const score = scores[section].total;
+                const advice = getAdvice(section, score);
+                const container = document.getElementById(`result${section}`);
+                
+                if (advice) {
+                    container.innerHTML = `
+                        <div class="section-result">
+                            <p class="font-bold text-orange-800 mb-1">您的得分：${score} 分</p>
+                            <p class="mb-2">${advice.desc}</p>
+                            <p class="text-green-700 font-semibold">✅ ${advice.action}</p>
+                        </div>
+                    `;
+                    container.classList.remove('hidden');
+                }
+            });
+
+            // 2. 計算總分並顯示總體分析
+            const grandTotal = Object.values(scores).reduce((sum, s) => sum + s.total, 0);
+            let resultHTML = '';
+            let analysisHTML = '';
+            let analysisClass = '';
+
+            // 總分分析邏輯
+            if (grandTotal >= 90) {
+                analysisClass = 'result-box-green';
+                analysisHTML = `
+                    <h2 class="text-2xl font-bold text-green-700 mb-2 flex items-center gap-2">
+                        <span class="text-3xl">🟢</span> 財務安全度：優秀 (總分 ${grandTotal} 分)
+                    </h2>
+                    <p class="text-lg font-semibold text-green-800 mb-4 border-b border-green-100 pb-2">恭喜你！ 你的家庭財務安全度很高，已經建立了穩固的理財基礎。</p>
+                    <h3 class="font-bold text-green-700 mb-2">你的優勢：</h3>
+                    <ul class="list-disc list-inside text-green-800 space-y-1 mb-4 bg-green-50 p-3 rounded">
+                        <li>財務基礎穩固，心理狀態健康</li>
+                        <li>有良好的理財習慣和規劃能力</li>
+                        <li>面對財務挑戰時有足夠的應變能力</li>
+                    </ul>
+                    <h3 class="font-bold text-green-700 mb-2">持續精進建議：</h3>
+                    <ul class="list-disc list-inside text-green-800 space-y-1">
+                        <li>考慮更進階的投資理財學習，例如 ${createLink('幸福家庭財務長', '幸福家庭財務長')}</li>
+                        <li>分享經驗，幫助其他家庭提升財務安全</li>
+                        <li>定期檢視並優化現有的理財策略</li>
+                    </ul>
+                `;
+            } else if (grandTotal >= 70) {
+                analysisClass = 'result-box-yellow';
+                analysisHTML = `
+                    <h2 class="text-2xl font-bold text-yellow-700 mb-2 flex items-center gap-2">
+                        <span class="text-3xl">🟡</span> 財務安全度：良好 (總分 ${grandTotal} 分)
+                    </h2>
+                    <p class="text-lg font-semibold text-yellow-800 mb-4 border-b border-yellow-100 pb-2">很棒的開始！ 你已經具備基本的財務安全基礎。</p>
+                    <h3 class="font-bold text-yellow-700 mb-2">你的狀況：</h3>
+                    <ul class="list-disc list-inside text-yellow-800 space-y-1 mb-4 bg-yellow-50 p-3 rounded">
+                        <li>基本財務管理能力不錯</li>
+                        <li>某些領域還有成長空間</li>
+                        <li>整體方向正確，需要持續努力</li>
+                    </ul>
+                    <h3 class="font-bold text-yellow-700 mb-2">建議加強方向：</h3>
+                    <ul class="list-disc list-inside text-yellow-800 space-y-1">
+                        <li>檢視得分較低的部分，重點改善</li>
+                        <li>加入理財學習社群 ${createLink('8週存款成長營', '8週存款成長營')} ，獲得更多支持</li>
+                        <li>考慮 ${createLink('60天存款成長計畫', '60天存款成長計畫')}，讓家庭財務有更穩固的基礎</li>
+                    </ul>
+                `;
+            } else if (grandTotal >= 50) {
+                analysisClass = 'result-box-orange';
+                analysisHTML = `
+                    <h2 class="text-2xl font-bold text-orange-700 mb-2 flex items-center gap-2">
+                        <span class="text-3xl">🟠</span> 財務安全度：待加強 (總分 ${grandTotal} 分)
+                    </h2>
+                    <p class="text-lg font-semibold text-orange-800 mb-4 border-b border-orange-100 pb-2">你很有潛力！ 已經開始關注家庭財務，現在是建立安全網的好時機。</p>
+                    <h3 class="font-bold text-orange-700 mb-2">你的狀況：</h3>
+                    <ul class="list-disc list-inside text-orange-800 space-y-1 mb-4 bg-orange-50 p-3 rounded">
+                        <li>理財意識已經覺醒</li>
+                        <li>需要更系統性的學習和實作</li>
+                        <li>建立基本安全網是當務之急</li>
+                    </ul>
+                    <h3 class="font-bold text-orange-700 mb-2">建議優先行動：</h3>
+                    <ul class="list-disc list-inside text-orange-800 space-y-1">
+                        <li>先從記帳開始，了解金錢流向</li>
+                        <li>建立緊急預備金，增加安全感</li>
+                        <li>考慮理財新手必備經典 ${createLink('家庭理財必修課', '家庭理財必修課')}，系統性學習理財規劃</li>
+                    </ul>
+                `;
+            } else {
+                analysisClass = 'result-box-red';
+                analysisHTML = `
+                    <h2 class="text-2xl font-bold text-red-700 mb-2 flex items-center gap-2">
+                        <span class="text-3xl">🔴</span> 財務安全度：需關注 (總分 ${grandTotal} 分)
+                    </h2>
+                    <p class="text-lg font-semibold text-red-800 mb-4 border-b border-red-100 pb-2">別擔心，每個人都有起點！ 現在開始關注就是最好的時機。</p>
+                    <h3 class="font-bold text-red-700 mb-2">你的狀況：</h3>
+                    <ul class="list-disc list-inside text-red-800 space-y-1 mb-4 bg-red-50 p-3 rounded">
+                        <li>財務基礎需要從頭建立</li>
+                        <li>可能面臨一些經濟壓力</li>
+                        <li>需要溫和而有系統的改善計畫</li>
+                    </ul>
+                    <h3 class="font-bold text-red-700 mb-2">建議立即行動：</h3>
+                    <ul class="list-disc list-inside text-red-800 space-y-1">
+                        <li>不要給自己太大壓力，從小目標開始</li>
+                        <li>優先處理最急迫的財務問題</li>
+                        <li>尋求專業協助，不要一個人承擔</li>
+                    </ul>
+                `;
+            }
+
+            // 插入總結方塊
+            resultHTML += `<section class="result-box ${analysisClass}">${analysisHTML}</section>`;
+
+            // 3. 產生詳細的「依據得分重點加強建議」
+            let adviceItems = [];
+
+            if (scores.A.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">🏗️ A項得分低於15：需要提升收支掌控力</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 建立基礎財務管理習慣</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>開始記帳，用簡單的方式也可以</li>
+                        <li>列出每月固定收入和支出</li>
+                        <li>設定一個小額儲蓄目標</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> 理財學習社群 ${createLink('8週存款成長營', '8週存款成長營')}，和其他媽媽一起學習記帳</p>
+                `);
+            }
+            if (scores.B.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">🆘 B項得分低於15：提升緊急應變能力</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 建立家庭財務安全網</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>先建立家庭緊急金帳戶</li>
+                        <li>檢視家庭保險保障是否足夠</li>
+                        <li>了解政府相關補助和資源</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> 考慮諮詢MomPower的家庭財務規劃師</p>
+                `);
+            }
+            if (scores.C.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">🔮 C項得分低於15：未來規劃準備不足</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 開始進行長期財務規劃</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>設定一個明確的理財目標</li>
+                        <li>開始了解基本投資概念</li>
+                        <li>為孩子開立教育基金帳戶</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> 理財新手必備經典 ${createLink('家庭理財必修課', '家庭理財必修課')} ，系統性學習理財規劃</p>
+                `);
+            }
+            if (scores.D.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">💝 D項得分低於15：常常焦慮金錢不足</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 與其焦慮不如開始學習正確的認識金錢</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>練習感恩目前已有的資源</li>
+                        <li>設定小目標，累積成功經驗</li>
+                        <li>學習壓力管理和放鬆技巧</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> 收聽 ${createLink('精算媽咪的家計簿Podcast節目', '精算媽咪的家計簿 Podcast')} 並閱讀更多心態調整相關文章</p>
+                `);
+            }
+            if (scores.E.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">📚 E項得分低於15：理財知識開放度過低</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 練習開放的心，了解理財規劃與常見的工具</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>每週學習一個理財概念</li>
+                        <li>加入理財學習社群</li>
+                        <li>從最基礎的概念開始學習</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> 加入 ${createLink('60天存款成長計畫', '60天存款成長計畫')} ，讓教練陪伴你理財知識快速加分</p>
+                `);
+            }
+            if (scores.F.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">👫 F項得分低於15：家庭財務缺乏良好溝通</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 建立良好的金錢溝通模式</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>和伴侶約定定期財務會議</li>
+                        <li>學習非暴力溝通技巧</li>
+                        <li>分享彼此的理財目標和擔憂</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> 夫妻理財溝通相關文章</p>
+                `);
+            }
+            if (scores.G.total < 15) {
+                adviceItems.push(`
+                    <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">🤝 G項得分低於15：無外部系統</h3>
+                    <p class="mb-2"><strong>優先改善：</strong> 建立理財學習支持網絡</p>
+                    <p class="font-semibold mb-1 text-gray-700">具體行動：</p>
+                    <ul class="list-disc list-inside mb-2 space-y-1 text-gray-600">
+                        <li>加入理財學習社群</li>
+                        <li>找到可信任的理財資訊來源</li>
+                        <li>不要害怕尋求專業協助</li>
+                    </ul>
+                    <p class="text-sm bg-red-50 p-2 rounded text-red-800"><strong>推薦資源：</strong> ${createLink('8週存款成長營', '8週存款成長營')}社群，每週三LiveTalk</p>
+                `);
+            }
+
+            if (adviceItems.length > 0) {
+                specificAdvice = `
+                    <section class="result-box bg-white mt-6">
+                        <h2 class="text-2xl font-bold text-red-800 mb-4">🎯 依據得分重點加強建議</h2>
+                        <p class="mb-4">看看你的A、B、C、D、E、F、G得分低於15的需要特別注意：</p>
+                        <div class="space-y-6">
+                            ${adviceItems.map(item => `<div class="border-t border-gray-200 pt-4">${item}</div>`).join('')}
+                        </div>
+                    </section>
+                `;
+            }
+
+            resultHTML += specificAdvice;
+
+            // --------------------------
+            // 4. 插入結果並顯示
+            // --------------------------
+            const resultsElement = document.getElementById('results');
+            resultsElement.innerHTML = resultHTML;
+            resultsElement.classList.remove('hidden');
+            
+            // 顯示額外建議區塊
+            document.getElementById('actionPlanSection').classList.remove('hidden');
+            document.getElementById('encouragementSection').classList.remove('hidden');
+
+            // 顯示下載按鈕
+            document.getElementById('downloadButton').classList.remove('hidden');
+
+            // 滾動到結果位置
+            resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+
+</body>
+</html>
