@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 html2pdf.js 函式庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- 引入 Font Awesome 圖示庫 (用於星星) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -24,36 +26,54 @@
         }
         .question-item {
             border-bottom: 1px solid #fed7aa; /* orange-200 */
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
+            padding-bottom: 1.5rem; /* 增加底部間距 */
+            margin-bottom: 1.5rem; /* 增加底部間距 */
         }
         .question-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
         }
-        .options {
+        
+        /* --- 評分樣式 --- */
+        .rating-container {
+            margin-top: 0.75rem;
+        }
+        .rating-labels {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-top: 0.75rem; /* 12px */
-            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem; /* 12px */
+            color: #6b7280; /* gray-500 */
+            padding: 0 0.5rem; /* 對齊星星中心 */
         }
-        .options label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            font-size: 0.875rem; /* 14px */
-            color: #4b5563; /* gray-600 */
-            min-width: 40px;
+        .rating-labels span {
+            flex: 1;
             text-align: center;
         }
-        .options input[type="radio"] {
-            accent-color: #f88137; /* 指定橘色 */
-            width: 1.25rem; /* 20px */
-            height: 1.25rem; /* 20px */
-            margin-bottom: 0.25rem; /* 4px */
+
+        .star-rating {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row-reverse; /* 讓星星從右到左排列，方便 CSS 選取 */
+            padding: 0 0.5rem;
+        }
+        .star-rating input {
+            display: none; /* 隱藏原本的 radio button */
+        }
+        .star-rating label {
+            font-size: 1.5rem; /* 24px */
+            color: #d1d5db; /* gray-300 (未選中顏色) */
+            cursor: pointer;
+            transition: color 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+        /* 滑過或選中時的樣式 (利用兄弟選擇器) */
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f88137; /* 指定橘色 */
         }
         
         /* 結果區塊樣式 */
@@ -229,21 +249,55 @@
                 </div>
             </section>
 
-            <!-- 使用說明 -->
+            <!-- 使用說明 (排版優化) -->
             <section class="question-card bg-orange-50">
                 <h2 class="text-2xl font-bold text-orange-800 mb-4">📋 使用說明</h2>
                 <p class="text-gray-700 mb-4">
                     這份量表幫助你了解目前家庭財務的安全程度，並找出可以加強的方向。請根據家庭目前的真實狀況作答，誠實評估現況。
                 </p>
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
-                    <h3 class="font-semibold text-orange-700 mb-2">評分方式：</h3>
-                    <ul class="list-none space-y-1 text-gray-600">
-                        <li><strong>1分：</strong>完全沒有</li>
-                        <li><strong>2分：</strong>稍微具備</li>
-                        <li><strong>3分：</strong>部分具備</li>
-                        <li><strong>4分：</strong>大致具備</li>
-                        <li><strong>5分：</strong>完全具備</li>
-                    </ul>
+                
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-orange-100">
+                    <h3 class="font-semibold text-orange-700 mb-4 text-lg border-b border-orange-100 pb-2">評分方式：</h3>
+                    
+                    <!-- 使用 Grid 佈局：手機單欄，平板雙欄，桌面五欄 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        
+                        <div class="flex items-center p-2 rounded bg-gray-50 border border-gray-100">
+                            <div class="flex text-[#f88137] mr-2 min-w-[20px]">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-700 text-sm font-medium">完全沒有</span>
+                        </div>
+
+                        <div class="flex items-center p-2 rounded bg-gray-50 border border-gray-100">
+                            <div class="flex text-[#f88137] mr-2 min-w-[40px]">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-700 text-sm font-medium">稍微具備</span>
+                        </div>
+
+                        <div class="flex items-center p-2 rounded bg-gray-50 border border-gray-100">
+                            <div class="flex text-[#f88137] mr-2 min-w-[60px]">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-700 text-sm font-medium">部分具備</span>
+                        </div>
+
+                        <div class="flex items-center p-2 rounded bg-gray-50 border border-gray-100">
+                            <div class="flex text-[#f88137] mr-2 min-w-[80px]">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-700 text-sm font-medium">大致具備</span>
+                        </div>
+
+                        <div class="flex items-center p-2 rounded bg-gray-50 border border-gray-100">
+                            <div class="flex text-[#f88137] mr-2 min-w-[100px]">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-700 text-sm font-medium">完全具備</span>
+                        </div>
+
+                    </div>
                 </div>
             </section>
 
@@ -256,53 +310,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">A. 收支掌控力</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">清楚知道每月的總收入</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qA1" value="1"></label>
-                                <label>2<input type="radio" name="qA1" value="2"></label>
-                                <label>3<input type="radio" name="qA1" value="3"></label>
-                                <label>4<input type="radio" name="qA1" value="4"></label>
-                                <label>5<input type="radio" name="qA1" value="5"></label>
+                            <p class="font-semibold mb-2">清楚知道每月的總收入</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qA1-5" name="qA1" value="5"><label for="qA1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA1-4" name="qA1" value="4"><label for="qA1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA1-3" name="qA1" value="3"><label for="qA1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA1-2" name="qA1" value="2"><label for="qA1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA1-1" name="qA1" value="1"><label for="qA1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">了解每月主要支出項目和金額</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qA2" value="1"></label>
-                                <label>2<input type="radio" name="qA2" value="2"></label>
-                                <label>3<input type="radio" name="qA2" value="3"></label>
-                                <label>4<input type="radio" name="qA2" value="4"></label>
-                                <label>5<input type="radio" name="qA2" value="5"></label>
+                            <p class="font-semibold mb-2">了解每月主要支出項目和金額</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qA2-5" name="qA2" value="5"><label for="qA2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA2-4" name="qA2" value="4"><label for="qA2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA2-3" name="qA2" value="3"><label for="qA2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA2-2" name="qA2" value="2"><label for="qA2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA2-1" name="qA2" value="1"><label for="qA2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">有記帳習慣，知道錢花到哪裡去</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qA3" value="1"></label>
-                                <label>2<input type="radio" name="qA3" value="2"></label>
-                                <label>3<input type="radio" name="qA3" value="3"></label>
-                                <label>4<input type="radio" name="qA3" value="4"></label>
-                                <label>5<input type="radio" name="qA3" value="5"></label>
+                            <p class="font-semibold mb-2">有記帳習慣，知道錢花到哪裡去</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qA3-5" name="qA3" value="5"><label for="qA3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA3-4" name="qA3" value="4"><label for="qA3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA3-3" name="qA3" value="3"><label for="qA3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA3-2" name="qA3" value="2"><label for="qA3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA3-1" name="qA3" value="1"><label for="qA3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">每月支出控制在收入範圍內</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qA4" value="1"></label>
-                                <label>2<input type="radio" name="qA4" value="2"></label>
-                                <label>3<input type="radio" name="qA4" value="3"></label>
-                                <label>4<input type="radio" name="qA4" value="4"></label>
-                                <label>5<input type="radio" name="qA4" value="5"></label>
+                            <p class="font-semibold mb-2">每月支出控制在收入範圍內</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qA4-5" name="qA4" value="5"><label for="qA4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA4-4" name="qA4" value="4"><label for="qA4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA4-3" name="qA4" value="3"><label for="qA4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA4-2" name="qA4" value="2"><label for="qA4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA4-1" name="qA4" value="1"><label for="qA4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">有固定的儲蓄習慣</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qA5" value="1"></label>
-                                <label>2<input type="radio" name="qA5" value="2"></label>
-                                <label>3<input type="radio" name="qA5" value="3"></label>
-                                <label>4<input type="radio" name="qA5" value="4"></label>
-                                <label>5<input type="radio" name="qA5" value="5"></label>
+                            <p class="font-semibold mb-2">有固定的儲蓄習慣</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qA5-5" name="qA5" value="5"><label for="qA5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA5-4" name="qA5" value="4"><label for="qA5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA5-3" name="qA5" value="3"><label for="qA5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA5-2" name="qA5" value="2"><label for="qA5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qA5-1" name="qA5" value="1"><label for="qA5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -319,53 +398,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">B. 緊急應變能力</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">有預備好緊急預備金（至少3個月生活費）</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qB1" value="1"></label>
-                                <label>2<input type="radio" name="qB1" value="2"></label>
-                                <label>3<input type="radio" name="qB1" value="3"></label>
-                                <label>4<input type="radio" name="qB1" value="4"></label>
-                                <label>5<input type="radio" name="qB1" value="5"></label>
+                            <p class="font-semibold mb-2">有預備好緊急預備金（至少3個月生活費）</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qB1-5" name="qB1" value="5"><label for="qB1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB1-4" name="qB1" value="4"><label for="qB1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB1-3" name="qB1" value="3"><label for="qB1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB1-2" name="qB1" value="2"><label for="qB1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB1-1" name="qB1" value="1"><label for="qB1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">如果遇到突發狀況，財務面不會手忙腳亂</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qB2" value="1"></label>
-                                <label>2<input type="radio" name="qB2" value="2"></label>
-                                <label>3<input type="radio" name="qB2" value="3"></label>
-                                <label>4<input type="radio" name="qB2" value="4"></label>
-                                <label>5<input type="radio" name="qB2" value="5"></label>
+                            <p class="font-semibold mb-2">如果遇到突發狀況，財務面不會手忙腳亂</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qB2-5" name="qB2" value="5"><label for="qB2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB2-4" name="qB2" value="4"><label for="qB2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB2-3" name="qB2" value="3"><label for="qB2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB2-2" name="qB2" value="2"><label for="qB2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB2-1" name="qB2" value="1"><label for="qB2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">財務遇到緊急狀況時，知道可以向誰求助</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qB3" value="1"></label>
-                                <label>2<input type="radio" name="qB3" value="2"></label>
-                                <label>3<input type="radio" name="qB3" value="3"></label>
-                                <label>4<input type="radio" name="qB3" value="4"></label>
-                                <label>5<input type="radio" name="qB3" value="5"></label>
+                            <p class="font-semibold mb-2">財務遇到緊急狀況時，知道可以向誰求助</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qB3-5" name="qB3" value="5"><label for="qB3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB3-4" name="qB3" value="4"><label for="qB3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB3-3" name="qB3" value="3"><label for="qB3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB3-2" name="qB3" value="2"><label for="qB3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB3-1" name="qB3" value="1"><label for="qB3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">有多元化的收入來源規劃</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qB4" value="1"></label>
-                                <label>2<input type="radio" name="qB4" value="2"></label>
-                                <label>3<input type="radio" name="qB4" value="3"></label>
-                                <label>4<input type="radio" name="qB4" value="4"></label>
-                                <label>5<input type="radio" name="qB4" value="5"></label>
+                            <p class="font-semibold mb-2">有多元化的收入來源規劃</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qB4-5" name="qB4" value="5"><label for="qB4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB4-4" name="qB4" value="4"><label for="qB4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB4-3" name="qB4" value="3"><label for="qB4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB4-2" name="qB4" value="2"><label for="qB4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB4-1" name="qB4" value="1"><label for="qB4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">家庭主要收入者有基本保險保障</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qB5" value="1"></label>
-                                <label>2<input type="radio" name="qB5" value="2"></label>
-                                <label>3<input type="radio" name="qB5" value="3"></label>
-                                <label>4<input type="radio" name="qB5" value="4"></label>
-                                <label>5<input type="radio" name="qB5" value="5"></label>
+                            <p class="font-semibold mb-2">家庭主要收入者有基本保險保障</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qB5-5" name="qB5" value="5"><label for="qB5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB5-4" name="qB5" value="4"><label for="qB5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB5-3" name="qB5" value="3"><label for="qB5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB5-2" name="qB5" value="2"><label for="qB5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qB5-1" name="qB5" value="1"><label for="qB5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -382,53 +486,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">C. 未來規劃準備度</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">有為孩子準備教育基金</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qC1" value="1"></label>
-                                <label>2<input type="radio" name="qC1" value="2"></label>
-                                <label>3<input type="radio" name="qC1" value="3"></label>
-                                <label>4<input type="radio" name="qC1" value="4"></label>
-                                <label>5<input type="radio" name="qC1" value="5"></label>
+                            <p class="font-semibold mb-2">有為孩子準備教育基金</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qC1-5" name="qC1" value="5"><label for="qC1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC1-4" name="qC1" value="4"><label for="qC1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC1-3" name="qC1" value="3"><label for="qC1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC1-2" name="qC1" value="2"><label for="qC1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC1-1" name="qC1" value="1"><label for="qC1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">開始為退休做財務準備</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qC2" value="1"></label>
-                                <label>2<input type="radio" name="qC2" value="2"></label>
-                                <label>3<input type="radio" name="qC2" value="3"></label>
-                                <label>4<input type="radio" name="qC2" value="4"></label>
-                                <label>5<input type="radio" name="qC2" value="5"></label>
+                            <p class="font-semibold mb-2">開始為退休做財務準備</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qC2-5" name="qC2" value="5"><label for="qC2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC2-4" name="qC2" value="4"><label for="qC2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC2-3" name="qC2" value="3"><label for="qC2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC2-2" name="qC2" value="2"><label for="qC2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC2-1" name="qC2" value="1"><label for="qC2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">了解基本的投資理財概念</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qC3" value="1"></label>
-                                <label>2<input type="radio" name="qC3" value="2"></label>
-                                <label>3<input type="radio" name="qC3" value="3"></label>
-                                <label>4<input type="radio" name="qC3" value="4"></label>
-                                <label>5<input type="radio" name="qC3" value="5"></label>
+                            <p class="font-semibold mb-2">了解基本的投資理財概念</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qC3-5" name="qC3" value="5"><label for="qC3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC3-4" name="qC3" value="4"><label for="qC3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC3-3" name="qC3" value="3"><label for="qC3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC3-2" name="qC3" value="2"><label for="qC3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC3-1" name="qC3" value="1"><label for="qC3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">有長期的財務目標設定</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qC4" value="1"></label>
-                                <label>2<input type="radio" name="qC4" value="2"></label>
-                                <label>3<input type="radio" name="qC4" value="3"></label>
-                                <label>4<input type="radio" name="qC4" value="4"></label>
-                                <label>5<input type="radio" name="qC4" value="5"></label>
+                            <p class="font-semibold mb-2">有長期的財務目標設定</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qC4-5" name="qC4" value="5"><label for="qC4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC4-4" name="qC4" value="4"><label for="qC4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC4-3" name="qC4" value="3"><label for="qC4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC4-2" name="qC4" value="2"><label for="qC4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC4-1" name="qC4" value="1"><label for="qC4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">定期檢視和調整理財計畫</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qC5" value="1"></label>
-                                <label>2<input type="radio" name="qC5" value="2"></label>
-                                <label>3<input type="radio" name="qC5" value="3"></label>
-                                <label>4<input type="radio" name="qC5" value="4"></label>
-                                <label>5<input type="radio" name="qC5" value="5"></label>
+                            <p class="font-semibold mb-2">定期檢視和調整理財計畫</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qC5-5" name="qC5" value="5"><label for="qC5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC5-4" name="qC5" value="4"><label for="qC5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC5-3" name="qC5" value="3"><label for="qC5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC5-2" name="qC5" value="2"><label for="qC5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qC5-1" name="qC5" value="1"><label for="qC5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -448,53 +577,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">D. 金錢安心感</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">對目前的財務狀況感到踏實</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qD1" value="1"></label>
-                                <label>2<input type="radio" name="qD1" value="2"></label>
-                                <label>3<input type="radio" name="qD1" value="3"></label>
-                                <label>4<input type="radio" name="qD1" value="4"></label>
-                                <label>5<input type="radio" name="qD1" value="5"></label>
+                            <p class="font-semibold mb-2">對目前的財務狀況感到踏實</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qD1-5" name="qD1" value="5"><label for="qD1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD1-4" name="qD1" value="4"><label for="qD1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD1-3" name="qD1" value="3"><label for="qD1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD1-2" name="qD1" value="2"><label for="qD1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD1-1" name="qD1" value="1"><label for="qD1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">不會因為金錢問題而經常失眠</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qD2" value="1"></label>
-                                <label>2<input type="radio" name="qD2" value="2"></label>
-                                <label>3<input type="radio" name="qD2" value="3"></label>
-                                <label>4<input type="radio" name="qD2" value="4"></label>
-                                <label>5<input type="radio" name="qD2" value="5"></label>
+                            <p class="font-semibold mb-2">不會因為金錢問題而經常失眠</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qD2-5" name="qD2" value="5"><label for="qD2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD2-4" name="qD2" value="4"><label for="qD2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD2-3" name="qD2" value="3"><label for="qD2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD2-2" name="qD2" value="2"><label for="qD2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD2-1" name="qD2" value="1"><label for="qD2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">面對意外支出不會影響心情</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qD3" value="1"></label>
-                                <label>2<input type="radio" name="qD3" value="2"></label>
-                                <label>3<input type="radio" name="qD3" value="3"></label>
-                                <label>4<input type="radio" name="qD3" value="4"></label>
-                                <label>5<input type="radio" name="qD3" value="5"></label>
+                            <p class="font-semibold mb-2">面對意外支出不會影響心情</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qD3-5" name="qD3" value="5"><label for="qD3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD3-4" name="qD3" value="4"><label for="qD3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD3-3" name="qD3" value="3"><label for="qD3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD3-2" name="qD3" value="2"><label for="qD3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD3-1" name="qD3" value="1"><label for="qD3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">相信自己有能力管理家庭財務</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qD4" value="1"></label>
-                                <label>2<input type="radio" name="qD4" value="2"></label>
-                                <label>3<input type="radio" name="qD4" value="3"></label>
-                                <label>4<input type="radio" name="qD4" value="4"></label>
-                                <label>5<input type="radio" name="qD4" value="5"></label>
+                            <p class="font-semibold mb-2">相信自己有能力管理家庭財務</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qD4-5" name="qD4" value="5"><label for="qD4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD4-4" name="qD4" value="4"><label for="qD4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD4-3" name="qD4" value="3"><label for="qD4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD4-2" name="qD4" value="2"><label for="qD4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD4-1" name="qD4" value="1"><label for="qD4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">對未來的經濟生活有信心</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qD5" value="1"></label>
-                                <label>2<input type="radio" name="qD5" value="2"></label>
-                                <label>3<input type="radio" name="qD5" value="3"></label>
-                                <label>4<input type="radio" name="qD5" value="4"></label>
-                                <label>5<input type="radio" name="qD5" value="5"></label>
+                            <p class="font-semibold mb-2">對未來的經濟生活有信心</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qD5-5" name="qD5" value="5"><label for="qD5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD5-4" name="qD5" value="4"><label for="qD5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD5-3" name="qD5" value="3"><label for="qD5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD5-2" name="qD5" value="2"><label for="qD5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qD5-1" name="qD5" value="1"><label for="qD5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -511,53 +665,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">E. 理財知識開放度</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">基本理解常見的理財工具</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qE1" value="1"></label>
-                                <label>2<input type="radio" name="qE1" value="2"></label>
-                                <label>3<input type="radio" name="qE1" value="3"></label>
-                                <label>4<input type="radio" name="qE1" value="4"></label>
-                                <label>5<input type="radio" name="qE1" value="5"></label>
+                            <p class="font-semibold mb-2">基本理解常見的理財工具</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qE1-5" name="qE1" value="5"><label for="qE1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE1-4" name="qE1" value="4"><label for="qE1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE1-3" name="qE1" value="3"><label for="qE1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE1-2" name="qE1" value="2"><label for="qE1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE1-1" name="qE1" value="1"><label for="qE1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">對於投資配置方式，自己有一套邏輯</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qE2" value="1"></label>
-                                <label>2<input type="radio" name="qE2" value="2"></label>
-                                <label>3<input type="radio" name="qE2" value="3"></label>
-                                <label>4<input type="radio" name="qE2" value="4"></label>
-                                <label>5<input type="radio" name="qE2" value="5"></label>
+                            <p class="font-semibold mb-2">對於投資配置方式，自己有一套邏輯</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qE2-5" name="qE2" value="5"><label for="qE2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE2-4" name="qE2" value="4"><label for="qE2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE2-3" name="qE2" value="3"><label for="qE2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE2-2" name="qE2" value="2"><label for="qE2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE2-1" name="qE2" value="1"><label for="qE2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">對於新的投資資訊，有自己的辨識方式</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qE3" value="1"></label>
-                                <label>2<input type="radio" name="qE3" value="2"></label>
-                                <label>3<input type="radio" name="qE3" value="3"></label>
-                                <label>4<input type="radio" name="qE3" value="4"></label>
-                                <label>5<input type="radio" name="qE3" value="5"></label>
+                            <p class="font-semibold mb-2">對於新的投資資訊，有自己的辨識方式</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qE3-5" name="qE3" value="5"><label for="qE3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE3-4" name="qE3" value="4"><label for="qE3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE3-3" name="qE3" value="3"><label for="qE3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE3-2" name="qE3" value="2"><label for="qE3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE3-1" name="qE3" value="1"><label for="qE3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">身邊有朋友圈或學習圈可以共同討論理財投資問題</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qE4" value="1"></label>
-                                <label>2<input type="radio" name="qE4" value="2"></label>
-                                <label>3<input type="radio" name="qE4" value="3"></label>
-                                <label>4<input type="radio" name="qE4" value="4"></label>
-                                <label>5<input type="radio" name="qE4" value="5"></label>
+                            <p class="font-semibold mb-2">身邊有朋友圈或學習圈可以共同討論理財投資問題</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qE4-5" name="qE4" value="5"><label for="qE4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE4-4" name="qE4" value="4"><label for="qE4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE4-3" name="qE4" value="3"><label for="qE4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE4-2" name="qE4" value="2"><label for="qE4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE4-1" name="qE4" value="1"><label for="qE4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">對於理財投資新的資訊抱持的開放態度了解</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qE5" value="1"></label>
-                                <label>2<input type="radio" name="qE5" value="2"></label>
-                                <label>3<input type="radio" name="qE5" value="3"></label>
-                                <label>4<input type="radio" name="qE5" value="4"></label>
-                                <label>5<input type="radio" name="qE5" value="5"></label>
+                            <p class="font-semibold mb-2">對於理財投資新的資訊抱持的開放態度了解</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qE5-5" name="qE5" value="5"><label for="qE5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE5-4" name="qE5" value="4"><label for="qE5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE5-3" name="qE5" value="3"><label for="qE5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE5-2" name="qE5" value="2"><label for="qE5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qE5-1" name="qE5" value="1"><label for="qE5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -574,53 +753,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">F. 家庭財務溝通</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">和伴侶能夠開誠布公討論金錢</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qF1" value="1"></label>
-                                <label>2<input type="radio" name="qF1" value="2"></label>
-                                <label>3<input type="radio" name="qF1" value="3"></label>
-                                <label>4<input type="radio" name="qF1" value="4"></label>
-                                <label>5<input type="radio" name="qF1" value="5"></label>
+                            <p class="font-semibold mb-2">和伴侶能夠開誠布公討論金錢</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qF1-5" name="qF1" value="5"><label for="qF1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF1-4" name="qF1" value="4"><label for="qF1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF1-3" name="qF1" value="3"><label for="qF1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF1-2" name="qF1" value="2"><label for="qF1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF1-1" name="qF1" value="1"><label for="qF1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">家庭重大支出會一起商量決定</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qF2" value="1"></label>
-                                <label>2<input type="radio" name="qF2" value="2"></label>
-                                <label>3<input type="radio" name="qF2" value="3"></label>
-                                <label>4<input type="radio" name="qF2" value="4"></label>
-                                <label>5<input type="radio" name="qF2" value="5"></label>
+                            <p class="font-semibold mb-2">家庭重大支出會一起商量決定</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qF2-5" name="qF2" value="5"><label for="qF2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF2-4" name="qF2" value="4"><label for="qF2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF2-3" name="qF2" value="3"><label for="qF2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF2-2" name="qF2" value="2"><label for="qF2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF2-1" name="qF2" value="1"><label for="qF2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">對家庭財務分工有清楚共識</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qF3" value="1"></label>
-                                <label>2<input type="radio" name="qF3" value="2"></label>
-                                <label>3<input type="radio" name="qF3" value="3"></label>
-                                <label>4<input type="radio" name="qF3" value="4"></label>
-                                <label>5<input type="radio" name="qF3" value="5"></label>
+                            <p class="font-semibold mb-2">對家庭財務分工有清楚共識</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qF3-5" name="qF3" value="5"><label for="qF3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF3-4" name="qF3" value="4"><label for="qF3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF3-3" name="qF3" value="3"><label for="qF3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF3-2" name="qF3" value="2"><label for="qF3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF3-1" name="qF3" value="1"><label for="qF3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">能夠理性處理金錢相關的分歧</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qF4" value="1"></label>
-                                <label>2<input type="radio" name="qF4" value="2"></label>
-                                <label>3<input type="radio" name="qF4" value="3"></label>
-                                <label>4<input type="radio" name="qF4" value="4"></label>
-                                <label>5<input type="radio" name="qF4" value="5"></label>
+                            <p class="font-semibold mb-2">能夠理性處理金錢相關的分歧</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qF4-5" name="qF4" value="5"><label for="qF4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF4-4" name="qF4" value="4"><label for="qF4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF4-3" name="qF4" value="3"><label for="qF4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF4-2" name="qF4" value="2"><label for="qF4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF4-1" name="qF4" value="1"><label for="qF4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">對孩子教育使用金錢方式有共同理念</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qF5" value="1"></label>
-                                <label>2<input type="radio" name="qF5" value="2"></label>
-                                <label>3<input type="radio" name="qF5" value="3"></label>
-                                <label>4<input type="radio" name="qF5" value="4"></label>
-                                <label>5<input type="radio" name="qF5" value="5"></label>
+                            <p class="font-semibold mb-2">對孩子教育使用金錢方式有共同理念</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qF5-5" name="qF5" value="5"><label for="qF5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF5-4" name="qF5" value="4"><label for="qF5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF5-3" name="qF5" value="3"><label for="qF5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF5-2" name="qF5" value="2"><label for="qF5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qF5-1" name="qF5" value="1"><label for="qF5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -637,53 +841,78 @@
                     <h3 class="text-xl font-bold text-orange-700 mb-4">G. 外部支持系統</h3>
                     <div class="space-y-4">
                         <div class="question-item">
-                            <p class="font-semibold">對意外狀況，家人可以互相討論或支援</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qG1" value="1"></label>
-                                <label>2<input type="radio" name="qG1" value="2"></label>
-                                <label>3<input type="radio" name="qG1" value="3"></label>
-                                <label>4<input type="radio" name="qG1" value="4"></label>
-                                <label>5<input type="radio" name="qG1" value="5"></label>
+                            <p class="font-semibold mb-2">對意外狀況，家人可以互相討論或支援</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qG1-5" name="qG1" value="5"><label for="qG1-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG1-4" name="qG1" value="4"><label for="qG1-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG1-3" name="qG1" value="3"><label for="qG1-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG1-2" name="qG1" value="2"><label for="qG1-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG1-1" name="qG1" value="1"><label for="qG1-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">有長期往來互動良好的銀行資源</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qG2" value="1"></label>
-                                <label>2<input type="radio" name="qG2" value="2"></label>
-                                <label>3<input type="radio" name="qG2" value="3"></label>
-                                <label>4<input type="radio" name="qG2" value="4"></label>
-                                <label>5<input type="radio" name="qG2" value="5"></label>
+                            <p class="font-semibold mb-2">有長期往來互動良好的銀行資源</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qG2-5" name="qG2" value="5"><label for="qG2-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG2-4" name="qG2" value="4"><label for="qG2-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG2-3" name="qG2" value="3"><label for="qG2-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG2-2" name="qG2" value="2"><label for="qG2-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG2-1" name="qG2" value="1"><label for="qG2-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">身邊有好的學習社群和專業顧問</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qG3" value="1"></label>
-                                <label>2<input type="radio" name="qG3" value="2"></label>
-                                <label>3<input type="radio" name="qG3" value="3"></label>
-                                <label>4<input type="radio" name="qG3" value="4"></label>
-                                <label>5<input type="radio" name="qG3" value="5"></label>
+                            <p class="font-semibold mb-2">身邊有好的學習社群和專業顧問</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qG3-5" name="qG3" value="5"><label for="qG3-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG3-4" name="qG3" value="4"><label for="qG3-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG3-3" name="qG3" value="3"><label for="qG3-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG3-2" name="qG3" value="2"><label for="qG3-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG3-1" name="qG3" value="1"><label for="qG3-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">有了解並善用政策提供的資源</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qG4" value="1"></label>
-                                <label>2<input type="radio" name="qG4" value="2"></label>
-                                <label>3<input type="radio" name="qG4" value="3"></label>
-                                <label>4<input type="radio" name="qG4" value="4"></label>
-                                <label>5<input type="radio" name="qG4" value="5"></label>
+                            <p class="font-semibold mb-2">有了解並善用政策提供的資源</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qG4-5" name="qG4" value="5"><label for="qG4-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG4-4" name="qG4" value="4"><label for="qG4-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG4-3" name="qG4" value="3"><label for="qG4-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG4-2" name="qG4" value="2"><label for="qG4-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG4-1" name="qG4" value="1"><label for="qG4-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                         <div class="question-item">
-                            <p class="font-semibold">常常有在觀看留意新的財經資訊</p>
-                            <div class="options">
-                                <label>1<input type="radio" name="qG5" value="1"></label>
-                                <label>2<input type="radio" name="qG5" value="2"></label>
-                                <label>3<input type="radio" name="qG5" value="3"></label>
-                                <label>4<input type="radio" name="qG5" value="4"></label>
-                                <label>5<input type="radio" name="qG5" value="5"></label>
+                            <p class="font-semibold mb-2">常常有在觀看留意新的財經資訊</p>
+                            <div class="rating-container">
+                                <div class="rating-labels">
+                                    <span>完全沒有</span><span>稍微具備</span><span>部分具備</span><span>大致具備</span><span>完全具備</span>
+                                </div>
+                                <div class="star-rating">
+                                    <input type="radio" id="qG5-5" name="qG5" value="5"><label for="qG5-5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG5-4" name="qG5" value="4"><label for="qG5-4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG5-3" name="qG5" value="3"><label for="qG5-3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG5-2" name="qG5" value="2"><label for="qG5-2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" id="qG5-1" name="qG5" value="1"><label for="qG5-1"><i class="fas fa-star"></i></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -923,8 +1152,6 @@
             clone.style.background = 'white';
             
             // 4. 將複本暫時加入 body (設為絕對定位，讓使用者看不到但瀏覽器渲染得到)
-            // 使用 visible 但 z-index 很低或者 fixed off-screen
-            // 這裡使用一個隱藏的容器來裝複本
             const container = document.createElement('div');
             container.style.position = 'absolute';
             container.style.top = '-9999px';
@@ -950,7 +1177,7 @@
                 console.error(err);
                 loadingOverlay.style.display = 'none';
                 document.body.removeChild(container);
-                alert('PDF 產生失敗，建議使用「快速列印」按鈕。');
+                alert('PDF 產生失敗，請聯繫網站管理員。');
             });
         }
 
@@ -1008,7 +1235,7 @@
                 let missingCount = 0;
                 
                 items.forEach(item => {
-                    if (!item.querySelector('input:checked')) {
+                    if (!item.querySelector('input[type="radio"]:checked')) {
                         missingCount++;
                     }
                 });
@@ -1262,7 +1489,6 @@
             document.getElementById('actionPlanSection').classList.remove('hidden');
             document.getElementById('encouragementSection').classList.remove('hidden');
             document.getElementById('downloadButton').classList.remove('hidden');
-            document.getElementById('printHint').classList.remove('hidden');
 
             // 滾動到結果位置
             resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
