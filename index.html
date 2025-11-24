@@ -193,46 +193,71 @@
            (這些樣式只會在產生 PDF 時的複製節點中生效)
         ---------------------------------------------------- */
         .pdf-mode {
-            width: 800px !important; /* 強制寬度 */
+            width: 750px !important; /* 調整寬度以更好適應 A4 */
             margin: 0 auto !important;
-            padding: 40px !important;
+            padding: 30px !important; /* 減少內邊距 */
             background-color: white !important;
             color: black !important;
             font-family: 'Noto Sans TC', sans-serif !important;
+            font-size: 12px !important; /* 縮小預設字體 */
         }
+        
+        /* 強制不分頁的元素 */
         .pdf-mode .question-card, 
-        .pdf-mode .result-box, 
-        .pdf-mode .chart-container {
+        .pdf-mode .result-box,
+        .pdf-mode .section-result,
+        .pdf-mode .chart-container,
+        .pdf-mode .mb-6 { /* 針對行動計畫的區塊 */
             box-shadow: none !important;
-            border: 1px solid #ccc !important;
-            page-break-inside: avoid !important; /* 避免區塊中間斷頁 */
+            border: 1px solid #eee !important;
+            page-break-inside: avoid !important; /* 關鍵：避免區塊中間斷頁 */
             margin-bottom: 20px !important;
+            break-inside: avoid !important;
         }
-        .pdf-mode h1 { font-size: 28px !important; color: #f88137 !important; }
-        .pdf-mode h2 { font-size: 22px !important; border-left-width: 6px !important; padding-left: 10px !important; margin-top: 20px !important; }
-        .pdf-mode h3 { font-size: 18px !important; color: #333 !important; }
-        .pdf-mode p, .pdf-mode li { font-size: 14px !important; line-height: 1.5 !important; }
+
+        .pdf-mode h1 { font-size: 24px !important; color: #f88137 !important; margin-bottom: 10px !important; }
+        .pdf-mode h2 { font-size: 18px !important; border-left-width: 4px !important; padding-left: 8px !important; margin-top: 15px !important; margin-bottom: 10px !important; }
+        .pdf-mode h3 { font-size: 16px !important; color: #333 !important; margin-bottom: 5px !important; }
+        .pdf-mode p, .pdf-mode li { font-size: 12px !important; line-height: 1.4 !important; }
+        
+        /* 讓建議區塊的紅字正常顯示 */
+        .pdf-mode .text-red-600 { color: #dc2626 !important; }
+        .pdf-mode .text-green-600 { color: #16a34a !important; }
         
         /* PDF 模式下隱藏不需要的按鈕與輸入區塊，只留結果 */
         .pdf-mode #quizForm,
         .pdf-mode .text-center.my-10, /* 按鈕區 */
+        .pdf-mode .rating-container { /* 隱藏星星評分，只留結果文字 */
+             display: none !important; 
+        }
+        
         .pdf-mode header img { 
-            /* 在 PDF 中，我們可能不想顯示完整的滿版 banner，或者可以調整大小 */
-            max-height: 150px !important;
+            max-height: 120px !important;
             object-fit: contain !important;
+            margin-bottom: 20px !important;
         }
         
         /* 讓雷達圖在 PDF 中正確顯示 */
         .pdf-mode .chart-container {
             height: auto !important;
-            min-height: 400px !important;
+            min-height: 350px !important;
+            width: 100% !important;
+            max-width: 500px !important;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            page-break-before: auto !important; /* 允許圖表前分頁 */
         }
         .pdf-mode img {
             max-width: 100% !important;
             height: auto !important;
+        }
+        
+        /* 針對行動建議列表 */
+        .pdf-mode .action-plan-list li {
+            margin-bottom: 4px !important;
         }
 
     </style>
@@ -879,7 +904,7 @@
             </section>
 
             <section id="encouragementSection" class="question-card bg-orange-50 text-center border border-orange-100 hidden">
-                <h2 class="text-2xl font-bold text-orange-700 mb-4">🌟MomPower給的愛的鼓勵</h2>
+                <h2 class="text-2xl font-bold text-orange-700 mb-4">🌟 MomPower給的愛的鼓勵</h2>
                 <div class="text-orange-800 leading-relaxed mb-4 space-y-4 text-left md:text-center">
                     <p>親愛的媽媽，財務安全真的不是一天、兩天就能建立起來的，但我想跟你說，每一個小小的行動，都在讓你的家庭變得更安全一點點。</p>
                     <p>無論你現在的分數是多少，光是你願意停下來檢視財務狀況，就已經很棒了，因為很多人連面對都不敢，但你做到了。</p>
@@ -889,7 +914,7 @@
                 <div class="mt-8 pt-6 border-t border-orange-200 text-gray-600 text-sm">
                     <p class="mb-4">這份家庭財務健檢量表是一個自我了解的工具，幫助你找到改善方向。</p>
                     <p class="mb-4">如果面臨嚴重的財務困難，建議尋求專業的財務規劃協助。</p>
-                    <p class="font-bold text-orange-800 text-base mb-4">歡迎加入MomPower 官方Line@ 獲得免費個別諮詢或推薦優惠!</p>
+                    <p class="font-bold text-orange-800 text-base mb-4">歡迎加入MomPower 官方Line:@mompower 獲得免費個別諮詢或推薦優惠!</p>
                 </div>
                 <div class="text-center mb-4" data-html2canvas-ignore="true">
                     <a href="https://lin.ee/y4tWjhe" target="_blank" class="inline-flex items-center justify-center gap-2 bg-[#06C755] text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-[#05b34c] transition transform hover:scale-105 no-underline">
