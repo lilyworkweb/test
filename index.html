@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -224,11 +224,44 @@
         .pdf-mode .text-red-600 { color: #dc2626 !important; }
         .pdf-mode .text-green-600 { color: #16a34a !important; }
         
-        /* PDF 模式下隱藏不需要的按鈕與輸入區塊，只留結果 */
-        .pdf-mode #quizForm,
-        .pdf-mode .text-center.my-10, /* 按鈕區 */
-        .pdf-mode .rating-container { /* 隱藏星星評分，只留結果文字 */
+        /* PDF 模式下的隱藏與顯示邏輯調整 */
+        .pdf-mode #quizForm {
+            /* 在 PDF 中顯示 A~G 的區塊 */
+            display: block !important;
+        }
+
+        .pdf-mode .text-center.my-10 {
+            /* 隱藏按鈕區 */
              display: none !important; 
+        }
+
+        .pdf-mode .rating-container {
+             /* 關鍵：在 PDF 中顯示評分星星 */
+             display: block !important; 
+             margin-top: 0 !important;
+             margin-bottom: 10px !important;
+        }
+
+        .pdf-mode .rating-labels {
+            /* 隱藏 "完全沒有"、"完全具備" 等文字標籤，節省空間 */
+            display: none !important;
+        }
+
+        .pdf-mode .star-rating {
+            /* 調整 PDF 中星星的排列與大小 */
+            justify-content: flex-end !important;
+        }
+        
+        .pdf-mode .star-rating label {
+             /* 縮小 PDF 中的星星 */
+             font-size: 1.25rem !important;
+        }
+
+        /* PDF 模式下，題目列表緊湊一點 */
+        .pdf-mode .question-item {
+            border-bottom: 1px dashed #eee !important;
+            padding-bottom: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
         }
         
         .pdf-mode header img { 
@@ -1061,6 +1094,19 @@
             // 2. 複製一份節點，避免修改到原始畫面
             const clone = element.cloneNode(true);
             
+            // --- ADDED: Sync Radio States ---
+            // 由於 cloneNode 不會複製表單的選取狀態，需手動同步
+            const originalInputs = element.querySelectorAll('input[type="radio"]');
+            const cloneInputs = clone.querySelectorAll('input[type="radio"]');
+            
+            originalInputs.forEach((input, index) => {
+                if (input.checked) {
+                    cloneInputs[index].setAttribute('checked', 'checked');
+                    cloneInputs[index].checked = true;
+                }
+            });
+            // --------------------------------
+
             // 3. 處理 Canvas：將雷達圖轉換為圖片並替換
             const originalCanvas = document.getElementById('radarChart');
             if (originalCanvas) {
@@ -1222,9 +1268,8 @@
             let analysisHTML = '';
             let analysisClass = '';
 
-            // 更新後的分數邏輯 (需關注: 25-50, 待加強: 50-70, 良好: 70-90, 優秀: 90-175)
-            // 注意：總分最高是 25 * 7 = 175 分
-            if (grandTotal >= 90) {
+            // 更新後的分數邏輯 (需關注: <75, 待加強: 75-105, 良好: 105-145, 優秀: 145+)
+            if (grandTotal >= 145) {
                 analysisClass = 'result-box-green';
                 analysisHTML = `
                     <h2 class="text-2xl font-bold text-green-700 mb-2 flex items-center gap-2">
@@ -1244,7 +1289,7 @@
                         <li>記得定期檢視一下現有的理財策略，看看有沒有可以優化的地方</li>
                     </ul>
                 `;
-            } else if (grandTotal >= 70) {
+            } else if (grandTotal >= 105) {
                 analysisClass = 'result-box-yellow';
                 analysisHTML = `
                     <h2 class="text-2xl font-bold text-yellow-700 mb-2 flex items-center gap-2">
@@ -1264,7 +1309,7 @@
                         <li>${createLink('60天存款成長計畫', '60天存款成長計畫')} 很適合你現在的階段，可以讓財務基礎更穩固</li>
                     </ul>
                 `;
-            } else if (grandTotal >= 50) {
+            } else if (grandTotal >= 75) {
                 analysisClass = 'result-box-orange';
                 analysisHTML = `
                     <h2 class="text-2xl font-bold text-orange-700 mb-2 flex items-center gap-2">
