@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏠 家庭財務健檢</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 html2pdf.js 函式庫 -->
+    <!-- 引入 html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- 引入 Font Awesome 圖示庫 (用於星星) -->
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,10 +108,13 @@
             list-style-type: none;
             padding-left: 0;
         }
+        /* 修正手機版文字切到問題：加入 word-break 和 overflow-wrap */
         .action-plan-list li {
             position: relative;
             padding-left: 2rem; /* 32px */
             margin-bottom: 0.5rem; /* 8px */
+            word-break: break-word;     /* 強制長單字換行 */
+            overflow-wrap: break-word;  /* 確保文字在小螢幕上正確換行 */
         }
         .action-plan-list li::before {
             content: '□';
@@ -177,6 +182,21 @@
             flex-direction: column;
         }
 
+        /* 雷達圖容器 */
+        .chart-container {
+            position: relative;
+            margin: auto;
+            /* 調整高度以適應手機版，避免過高 */
+            height: 350px; 
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 1rem;
+            padding: 0.5rem; /* 減少容器內距，讓 Canvas 有更多空間 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
         /* PDF 生成時的樣式調整 */
         .html2pdf__page-break {
             page-break-before: always;
@@ -193,7 +213,7 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            .question-card, .result-box, .advice-card {
+            .question-card, .result-box, .advice-card, .chart-container {
                 box-shadow: none;
                 border: 1px solid #ddd;
                 break-inside: avoid; 
@@ -208,10 +228,9 @@
     </style>
 </head>
 <body class="text-gray-800">
-    
-    <!-- 為了 PDF 截圖，將主要內容包在一個 ID 中 -->
+
     <div id="app-container">
-        <!-- ===== Logo 頂部置中區域 ===== -->
+        <!-- Header -->
         <header class="bg-white shadow-sm w-full py-6 mb-6 border-b-4 border-[#f88137]">
             <div class="max-w-3xl mx-auto px-4 flex flex-col items-center justify-center">
                 <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-md mb-2">
@@ -229,7 +248,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-orange-800 mb-2">🏠 家庭財務健檢</h1>
             </header>
 
-            <!-- 介紹 -->
+            <!-- 簡介區塊 -->
             <section class="question-card border-t-4 border-[#f88137]">
                 <h2 class="text-2xl font-bold text-orange-700 mb-4">你家的安全度有幾分？</h2>
                 <div class="text-gray-700 leading-relaxed space-y-4">
@@ -249,11 +268,13 @@
                 </div>
             </section>
 
+            <!-- (已移除) 使用說明區塊 -->
+
             <form id="quizForm">
                 <!-- 第一部分 -->
                 <h2 class="text-3xl font-bold text-gray-700 mt-10 mb-6 border-l-8 border-[#f88137] pl-4">第一部分：財務基礎與應變能力</h2>
 
-                <!-- A. 收支掌控力 -->
+                <!-- A Section -->
                 <div class="question-card" id="sectionA">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">A. 收支掌控力</h3>
                     <div class="space-y-4">
@@ -333,15 +354,14 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
+                    <!-- 小計與建議結果顯示區 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計A：<span id="subtotalA">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultA" class="hidden"></div>
                 </div>
 
-                <!-- B. 緊急應變能力 -->
+                <!-- B Section -->
                 <div class="question-card" id="sectionB">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">B. 緊急應變能力</h3>
                     <div class="space-y-4">
@@ -421,15 +441,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計B：<span id="subtotalB">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultB" class="hidden"></div>
                 </div>
 
-                <!-- C. 未來規劃準備度 -->
+                <!-- C Section -->
                 <div class="question-card" id="sectionC">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">C. 未來規劃準備度</h3>
                     <div class="space-y-4">
@@ -509,18 +527,16 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計C：<span id="subtotalC">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultC" class="hidden"></div>
                 </div>
 
                 <!-- 第二部分 -->
                 <h2 class="text-3xl font-bold text-gray-700 mt-10 mb-6 border-l-8 border-[#f88137] pl-4">第二部分：財務安全感與外部資源</h2>
 
-                <!-- D. 金錢安心感 -->
+                <!-- D Section -->
                 <div class="question-card" id="sectionD">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">D. 金錢安心感</h3>
                     <div class="space-y-4">
@@ -600,15 +616,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計D：<span id="subtotalD">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultD" class="hidden"></div>
                 </div>
 
-                <!-- E. 理財知識開放度 -->
+                <!-- E Section -->
                 <div class="question-card" id="sectionE">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">E. 理財知識開放度</h3>
                     <div class="space-y-4">
@@ -688,15 +702,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計E：<span id="subtotalE">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultE" class="hidden"></div>
                 </div>
 
-                <!-- F. 家庭財務溝通 -->
+                <!-- F Section -->
                 <div class="question-card" id="sectionF">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">F. 家庭財務溝通</h3>
                     <div class="space-y-4">
@@ -776,15 +788,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計F：<span id="subtotalF">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultF" class="hidden"></div>
                 </div>
 
-                <!-- G. 外部支持系統 -->
+                <!-- G Section -->
                 <div class="question-card" id="sectionG">
                     <h3 class="text-xl font-bold text-orange-700 mb-4">G. 外部支持系統</h3>
                     <div class="space-y-4">
@@ -864,22 +874,17 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 小計欄位 -->
                     <div class="text-right text-lg font-bold text-orange-800 mt-6">
                         小計G：<span id="subtotalG">0</span> 分
                     </div>
-                    <!-- 結果顯示區塊 (預設隱藏) -->
                     <div id="resultG" class="hidden"></div>
                 </div>
             </form>
 
-            <!-- 按鈕區 -->
-            <!-- data-html2canvas-ignore 讓 html2pdf 忽略這個區塊 -->
             <div class="text-center my-10 flex flex-wrap gap-4 justify-center" data-html2canvas-ignore="true">
                 <button id="calculateButton" class="bg-[#f88137] text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-orange-600 transition duration-300 transform hover:scale-105">
                     📊 查看我的財務健檢分析
                 </button>
-                <!-- 下載按鈕 (預設隱藏) -->
                 <button id="downloadButton" class="hidden bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -888,18 +893,16 @@
                     </svg>
                     下載分析報告 (PDF)
                 </button>
-                
                 <button id="resetButton" class="bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-400 transition duration-300">
                     ↻ 重新填寫
                 </button>
             </div>
 
-            <!-- 總分析結果 (預設隱藏) -->
+            <!-- 結果顯示區塊 -->
             <div id="results" class="hidden">
-                <!-- JS 會在這裡插入結果 -->
+                <!-- 雷達圖將會顯示在這裡 -->
             </div>
 
-            <!-- 提升財務安全度的行動計畫 -->
             <section id="actionPlanSection" class="question-card mt-10 border-t-4 border-green-500 hidden">
                 <h2 class="text-2xl font-bold text-green-700 mb-4">💪 提升財務安全度的行動計畫</h2>
                 <h3 class="font-semibold text-lg text-gray-800 mb-3">立即可做的事：</h3>
@@ -931,7 +934,6 @@
                 </ul>
             </section>
 
-            <!-- 鼓勵話語 -->
             <section id="encouragementSection" class="question-card bg-orange-50 text-center border border-orange-100 hidden">
                 <h2 class="text-2xl font-bold text-orange-700 mb-4">🌟 給你的鼓勵話語</h2>
                 <p class="text-orange-800 leading-relaxed mb-4">
@@ -950,14 +952,13 @@
                 </p>
             </section>
 
-            <!-- 頁尾版權聲明 -->
             <footer class="text-center mt-8 text-gray-500 text-sm pb-8 border-t border-orange-200 pt-6">
                 <p class="mb-2">這份家庭財務健檢量表是一個自我了解的工具，幫助你找到改善方向。如果面臨嚴重的財務困難，建議尋求專業的財務規劃協助。</p>
                 <p>&copy; 2025 MomPower 媽媽商學院. All Rights Reserved.</p>
             </footer>
-        </div> <!-- End of app-container -->
+        </div>
 
-        <!-- 錯誤提示視窗結構 (放在 app-container 外面以免被截圖) -->
+        <!-- 彈出視窗 -->
         <div id="validationModal">
             <div id="validationContent">
                 <p class="text-lg font-bold text-red-700 mb-3 text-center">請回答所有的問題，才能產生準確的分析報告喔！</p>
@@ -971,15 +972,13 @@
             </div>
         </div>
 
-        <!-- 載入中遮罩 -->
         <div id="loadingOverlay">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mb-4"></div>
             <p class="text-orange-700 font-bold text-xl">正在產生您的專屬報告...</p>
         </div>
 
-    
+    </div>
 
-    <!-- JS 腳本 -->
     <script>
         // 詳細的分析建議資料 (保留完整內容)
         const adviceData = {
@@ -1160,8 +1159,10 @@
             document.getElementById('validationModal').style.display = 'none';
         });
 
+        let radarChartInstance = null; // 儲存圖表實例
+
         function showResults() {
-            let specificAdvice = ''; // 補上變數宣告
+            let specificAdvice = ''; 
 
             const sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
             const sectionTitles = {
@@ -1231,7 +1232,7 @@
             let analysisHTML = '';
             let analysisClass = '';
 
-            // 總分分析邏輯
+            // 更新後的分數邏輯 (需關注: 25-75, 待加強: 75-105, 良好: 105-145, 優秀: 145-175)
             if (grandTotal >= 145) {
                 analysisClass = 'result-box-green';
                 analysisHTML = `
@@ -1313,6 +1314,13 @@
                     </ul>
                 `;
             }
+
+            // 新增：雷達圖 Canvas 容器
+            resultHTML += `
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            `;
 
             // 插入總結方塊
             resultHTML += `<section class="result-box ${analysisClass}">${analysisHTML}</section>`;
@@ -1440,8 +1448,103 @@
 
             // 滾動到結果位置
             resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // --------------------------
+            // 5. 繪製雷達圖 (手機版修正)
+            // --------------------------
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            // 如果已經有圖表實例，先銷毀它，避免重複繪製
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            // 偵測是否為手機裝置 (寬度小於 640px)
+            const isMobile = window.innerWidth < 640;
+
+            const chartData = {
+                labels: [
+                    'A. 收支掌控力',
+                    // 如果是手機版，可以考慮把長標籤拆行，但 Chart.js 處理中文換行有時需陣列
+                    // 這裡先簡單用較短的文字，或是靠 padding 解決
+                    isMobile ? ['B. 緊急', '應變能力'] : 'B. 緊急應變能力',
+                    'C. 未來規劃', 
+                    'D. 金錢安心感',
+                    'E. 理財知識',
+                    'F. 家庭溝通',
+                    'G. 外部資源'
+                ],
+                datasets: [{
+                    label: '財務健檢得分',
+                    data: [
+                        scores.A.total,
+                        scores.B.total,
+                        scores.C.total,
+                        scores.D.total,
+                        scores.E.total,
+                        scores.F.total,
+                        scores.G.total
+                    ],
+                    fill: true,
+                    backgroundColor: 'rgba(248, 129, 55, 0.2)', // 透明橘色背景
+                    borderColor: '#f88137', // 橘色邊框
+                    pointBackgroundColor: '#f88137',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#f88137'
+                }]
+            };
+
+            const chartConfig = {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    // 【關鍵修正】增加 layout padding，避免文字被切邊
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10,
+                            left: 10,
+                            right: 10 // 右側多留空間給「緊急應變能力」
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 25, 
+                            ticks: {
+                                stepSize: 5,
+                                font: { size: 12 },
+                                color: '#666',
+                                backdropColor: 'transparent' // 讓刻度背景透明，比較美觀
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: isMobile ? 11 : 14, // 手機版字體縮小
+                                    family: "'Noto Sans TC', sans-serif"
+                                },
+                                color: '#431407' 
+                            },
+                            grid: {
+                                color: '#e5e7eb' 
+                            },
+                            angleLines: {
+                                color: '#e5e7eb'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false 
+                        }
+                    }
+                }
+            };
+
+            radarChartInstance = new Chart(ctx, chartConfig);
         }
     </script>
-
 </body>
 </html>
