@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -225,30 +225,31 @@
         .pdf-mode .text-green-600 { color: #16a34a !important; }
         
         /* PDF 模式下的隱藏與顯示邏輯調整 */
-        .pdf-mode #quizForm {
-            /* 在 PDF 中顯示 A~G 的區塊 */
-            display: block !important;
-        }
-
+        
+        /* 1. 只隱藏按鈕區，保留 quizForm 和 rating-container */
         .pdf-mode .text-center.my-10 {
-            /* 隱藏按鈕區 */
              display: none !important; 
         }
 
+        /* 2. 確保問卷表單 (A~G) 在 PDF 中顯示 */
+        .pdf-mode #quizForm {
+            display: block !important;
+        }
+
+        /* 3. 確保星星評分容器在 PDF 中顯示 */
         .pdf-mode .rating-container {
-             /* 關鍵：在 PDF 中顯示評分星星 */
              display: block !important; 
              margin-top: 0 !important;
              margin-bottom: 10px !important;
         }
 
+        /* 4. 隱藏 "完全沒有"、"完全具備" 等文字標籤，節省空間 */
         .pdf-mode .rating-labels {
-            /* 隱藏 "完全沒有"、"完全具備" 等文字標籤，節省空間 */
             display: none !important;
         }
 
+        /* 5. 調整 PDF 中星星的排列 */
         .pdf-mode .star-rating {
-            /* 調整 PDF 中星星的排列與大小 */
             justify-content: flex-end !important;
         }
         
@@ -1101,7 +1102,7 @@
             
             originalInputs.forEach((input, index) => {
                 if (input.checked) {
-                    cloneInputs[index].setAttribute('checked', 'checked');
+                    cloneInputs[index].setAttribute('checked', 'checked'); // html2canvas relies on attribute for some CSS
                     cloneInputs[index].checked = true;
                 }
             });
